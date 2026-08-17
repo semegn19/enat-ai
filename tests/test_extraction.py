@@ -44,11 +44,27 @@ async def test_extraction_validates_symptoms_and_sets_danger_sign() -> None:
 @pytest.mark.asyncio
 async def test_extraction_retries_on_invalid_json() -> None:
     service = ExtractionService()
-    mock = AsyncMock(side_effect=["not-json", '{"symptoms":[]}'])
+    mock = AsyncMock(side_effect=["not-json", '{"symptoms":[{"raw_text":"ምንም","category":null,"duration":{"value":null,"unit":"unspecified"},"severity":"unspecified"}]}'])
     with patch.object(service.client, "generate_json", new=mock):
         items = await service.extract("ምንም", "symptoms")
-    assert items == []
+    assert len(items) == 1
+    assert items[0]["raw_text"] == "ምንም"
+    assert items[0]["danger_sign"] is False
     assert mock.await_count == 2
+
+
+@pytest.mark.asyncio
+async def test_extraction_negative_or_fine_symptom_captures_item() -> None:
+    service = ExtractionService()
+    llm_payload = {"symptoms": []}
+    with patch.object(service.client, "generate_json", new=AsyncMock(return_value=json.dumps(llm_payload))):
+        items = await service.extract("አይ ምንም ይለኛል", "symptoms")
+    assert len(items) == 1
+    assert items[0]["raw_text"] == "አይ ምንም ይለኛል"
+    assert items[0]["category"] == "no_danger_sign_detected"
+    assert items[0]["category_display"] == "ምንም የአደጋ ምልክት አልተገኘም (መደበኛ)"
+    assert items[0]["danger_sign"] is False
+    assert items[0]["verification_phrase"] == "አይ ምንም ይለኛል — ትክክል ነው?"
 
 
 @pytest.mark.asyncio
@@ -60,14 +76,14 @@ async def test_extraction_raises_after_max_retries() -> None:
         new=AsyncMock(return_value="not-json"),
     ):
         with pytest.raises(ValueError):
-            await service.extract("test", "symptoms")
+            await service.extract("", "symptoms")
 
 
 @pytest.mark.asyncio
 async def test_extraction_mild_symptom_overrides_danger_sign_to_false() -> None:
     service = ExtractionService()
     # Even if LLM erroneously outputs a category for a mild symptom,
-    # server-side guard forces category=None and danger_sign=False.
+    # server-side guard forces category="no_danger_sign_detected" and danger_sign=False.
     llm_payload = {
         "symptoms": [
             {
@@ -87,7 +103,8 @@ async def test_extraction_mild_symptom_overrides_danger_sign_to_false() -> None:
         items = await service.extract("ቀላል የድካም ስሜት", "symptoms")
 
     assert len(items) == 1
-    assert items[0]["category"] is None
+    assert items[0]["category"] == "no_danger_sign_detected"
+    assert items[0]["category_display"] == "ምንም የአደጋ ምልክት አልተገኘም (መደበኛ)"
     assert items[0]["danger_sign"] is False
     assert items[0]["verification_phrase"] == "ቀላል የድካም ስሜት — ትክክል ነው?"
 

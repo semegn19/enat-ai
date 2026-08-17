@@ -4,7 +4,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import auth, checkin, notifications, reminders, summary, users
+from app.api.routes import auth, checkin, notifications, reminders, summary, users, tts
 from app.config import get_settings
 from app.services.addis_ai import AddisAIClient
 from app.services.reminders import ReminderService

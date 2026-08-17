@@ -6,6 +6,7 @@ from app.db.repositories.appointments import AppointmentRepository
 from app.db.repositories.check_ins import CheckInRepository
 from app.db.repositories.summaries import SummaryRepository
 from app.db.repositories.users import UserRepository
+from app.services.extraction import _category_display
 from app.services.qr import build_share_url, generate_share_slug, upload_qr_code
 
 # Included in every clinician summary per PRD §6.2:
@@ -180,12 +181,20 @@ class SummaryService:
             for symptom in check_in.get("symptoms") or []:
                 if not symptom.get("confirmed"):
                     continue
+                raw_cat = symptom.get("category")
+                if not raw_cat or raw_cat in ("none", "null", "no_danger_sign_detected") or not symptom.get("danger_sign"):
+                    category_key = "no_danger_sign_detected"
+                else:
+                    category_key = raw_cat
+
                 entry = {
                     "date": check_in_date,
-                    "category": symptom.get("category"),
+                    "category": category_key,
+                    "category_display": _category_display(category_key, lang="am"),
+                    "category_display_en": _category_display(category_key, lang="en"),
                     "raw_text": symptom.get("raw_text"),
                     "duration": symptom.get("duration"),
-                    "severity": symptom.get("severity"),
+                    "severity": symptom.get("severity") or "unspecified",
                 }
                 if symptom.get("danger_sign"):
                     danger_signs.append(entry)

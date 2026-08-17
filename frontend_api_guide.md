@@ -420,17 +420,29 @@ Summaries aggregate all confirmed check-ins over a period for ANC doctor visits.
 {
   "id": "c138861d-91b4-4b51-bdf1-897711200119",
   "period_start": "2026-08-01",
-  "period_end": "2026-08-15",
-  "generated_at": "2026-08-15T13:00:00Z",
+  "period_end": "2026-08-17",
+  "generated_at": "2026-08-17T11:29:32Z",
   "content_json": {
     "danger_signs": [],
-    "symptoms_summary": [...],
-    "food_logs": [{"raw_text": "እንጀራ በሽሮ"}],
-    "supplement_adherence": {"taken_days": 5, "total_reported": 6, "percentage": 83.3},
-    "patient_questions": []
+    "general_symptoms": [
+      {
+        "date": "2026-08-17",
+        "category": "no_danger_sign_detected",
+        "category_display": "ምንም የአደጋ ምልክት አልተገኘም (መደበኛ)",
+        "category_display_en": "no danger sign detected (normal)",
+        "raw_text": "አይ ምንም ይለኛል",
+        "duration": {"value": null, "unit": "unspecified"},
+        "severity": "unspecified"
+      }
+    ],
+    "food_logs": [{"date": "2026-08-17", "raw_text": "እንጀራ በሽሮ"}],
+    "supplement_adherence": {"taken_days": 5, "tracked_days": 6},
+    "closing_mentions": [],
+    "muac_reminder": "MUAC screening due — check at visit",
+    "provenance_note": "All data in this summary is self-reported by the patient (no device-measured data)."
   },
-  "share_link_slug": "ab89ef12",
-  "qr_code_url": "https://.../qr/ab89ef12.png"
+  "share_link_slug": "tvkr1JopCeoZQJqG",
+  "qr_code_url": "https://.../tvkr1JopCeoZQJqG.png"
 }
 ```
 
